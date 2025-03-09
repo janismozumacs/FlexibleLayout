@@ -57,20 +57,20 @@ internal struct FlexibleLayoutResult {
         var currentIndices: [Int] = []
         var currentOffsets: [CGFloat] = []
         var currentSizes: [CGSize] = []
-        var currentRowWidth: CGFloat = 0      // Accumulated width of items (plus spacing) in current row.
+        var currentRowWidth: CGFloat = 0      // Accumulated width of items (excluding the left padding) in current row.
         var currentRowHeight: CGFloat = 0     // Maximum height in the current row.
         var totalHeight: CGFloat = 0          // Accumulated height of all rows.
 
-        // Helper closure that returns the spacing before adding a new subview.
-        // If it's the first subview in the row, use left side padding; otherwise, horizontal spacing.
-        func spacingBefore() -> CGFloat {
-            return currentIndices.isEmpty ? configuration.sidePadding : configuration.spacingHorizontal
+        // Helper closure that returns the inter-item spacing (always returns configuration.spacingHorizontal).
+        // The left side padding is applied only once when the first element is added.
+        func interItemSpacing() -> CGFloat {
+            return configuration.spacingHorizontal
         }
 
         // Finalize the current normal row, create a row object, and reset trackers.
         func finalizeRow() {
             guard !currentIndices.isEmpty else { return }
-            // For normal rows, add right side padding to complete the row width.
+            // For normal rows, add right side padding.
             let rowWidth = currentRowWidth + configuration.sidePadding
             let rowFrame = CGRect(x: 0, y: totalHeight, width: rowWidth, height: currentRowHeight)
             rows.append(Row(indices: currentIndices,
@@ -133,30 +133,31 @@ internal struct FlexibleLayoutResult {
             case .widget(let widgetSizing):
                 // Handle full-width widget that ignores side paddings separately.
                 if widgetSizing == .largeIgnoresSidePaddings {
-                    // Finalize any pending normal row before processing a full-width element.
                     if !currentIndices.isEmpty { finalizeRow() }
-                    // Compute size using full available width.
                     elementSize = subviews[index].sizeThatFits(ProposedViewSize(width: availableWidth, height: nil))
-                    // Create a row exclusively for this full-width widget.
                     let rowFrame = CGRect(x: 0, y: totalHeight, width: availableWidth, height: elementSize.height)
-                    // Full-width rows have no side paddings, so x-offset is 0.
                     rows.append(Row(indices: [index],
                                     offsets: [0],
                                     frame: rowFrame,
                                     subviewSizes: [elementSize],
                                     isFullWidth: true))
                     totalHeight += elementSize.height + configuration.spacingVertical
-                    continue  // Move to the next subview.
+                    continue
                 } else {
-                    // For small, medium, or large widgets that use side paddings,
-                    // compute the desired width using our helper function.
                     let desiredW = desiredWidth(for: widgetSizing)
                     elementSize = subviews[index].sizeThatFits(ProposedViewSize(width: desiredW, height: nil))
                 }
             }
 
-            // Calculate extra width required for this element, including the spacing before it.
-            let extraWidth = elementSize.width + spacingBefore()
+            // Calculate extra width required for this element.
+            // Note: The left side padding is applied only once at the beginning of the row.
+            let extraWidth: CGFloat
+            if currentIndices.isEmpty {
+                // For the first element, extraWidth is just its width.
+                extraWidth = elementSize.width
+            } else {
+                extraWidth = configuration.spacingHorizontal + elementSize.width
+            }
 
             // If adding this element would exceed available width (including right side padding),
             // finalize the current row.
@@ -167,19 +168,25 @@ internal struct FlexibleLayoutResult {
             }
 
             // Determine the x-offset for the element.
-            // For the first element in a normal row, the offset is the left side padding.
-            let offset: CGFloat = currentIndices.isEmpty ? configuration.sidePadding : (currentRowWidth + spacingBefore())
+            let offset: CGFloat
+            if currentIndices.isEmpty {
+                // For the first element, its x-offset is the left side padding.
+                offset = configuration.sidePadding
+                currentRowWidth = elementSize.width
+            } else {
+                // For subsequent elements, offset = left side padding + currentRowWidth + spacing.
+                offset = configuration.sidePadding + currentRowWidth + configuration.spacingHorizontal
+                currentRowWidth += configuration.spacingHorizontal + elementSize.width
+            }
             currentOffsets.append(offset)
             currentSizes.append(elementSize)
             currentIndices.append(index)
 
-            // Update the cumulative row width with the element's width and the spacing used.
-            currentRowWidth += elementSize.width + spacingBefore()
             // Update the row height to be the maximum height in the row.
             currentRowHeight = max(currentRowHeight, elementSize.height)
         }
 
-        // Finalize any remaining normal row after processing all subviews.
+        // Finalize any remaining normal row.
         finalizeRow()
 
         return (CGSize(width: availableWidth, height: totalHeight), rows)
@@ -196,20 +203,16 @@ internal struct FlexibleLayoutImplementation: Layout {
     let itemPreference: [FlexibleElementPreference]
     let configuration: FlexibleLayoutConfiguration
     
-    // Removed separate alignment properties;
-    // row alignments are now provided from configuration.
-    
+    // Row alignments are now provided from configuration.
     var idealCountInRow: Int?
 
     func sizeThatFits(proposal: ProposedViewSize,
                       subviews: Subviews,
                       cache: inout Cache) -> CGSize {
         guard !subviews.isEmpty else { return .zero }
-        // Validate or update cache before laying out.
         cache.validate(forProposedContainer: proposal) {
             prepareLayout(subviews, inContainer: proposal, cache: &$0)
         }
-        // Return the calculated total size.
         return cache.layoutResult?.totalSize ?? .zero
     }
     
@@ -219,17 +222,13 @@ internal struct FlexibleLayoutImplementation: Layout {
                        cache: inout Cache) {
         guard let layoutResult = cache.layoutResult else { return }
         
-        // Place each row based on the row alignments provided in configuration.
+        // Place each row using the alignments provided in configuration.
         for row in layoutResult.rows {
-            // Compute horizontal offset for the row based on configuration.rowHorizontalAlignment.
             let rowXOffset = (bounds.width - row.frame.width) * configuration.rowHorizontalAlignment.percent
-            // For vertical alignment within the row, use configuration.rowVerticalAlignment.
             for (rowElementIndex, subviewIndex) in row.indices.enumerated() {
                 let subview = subviews[subviewIndex]
                 let subviewSize = row.subviewSizes[rowElementIndex]
-                // x-position is computed by adding the rowXOffset and the subview's offset within the row.
                 let xPos = rowXOffset + row.frame.minX + row.offsets[rowElementIndex] + bounds.minX
-                // y-position aligns the subview vertically within the row according to configuration.rowVerticalAlignment.
                 let yPos = row.frame.minY + (row.frame.height - subviewSize.height) * configuration.rowVerticalAlignment.percent + bounds.minY
                 subview.place(
                     at: CGPoint(x: xPos, y: yPos),
@@ -250,7 +249,6 @@ internal struct FlexibleLayoutImplementation: Layout {
     func prepareLayout(_ subviews: Subviews,
                        inContainer proposal: ProposedViewSize,
                        cache: inout Cache) {
-        // Compute available width from the proposal.
         let availableWidth = proposal.replacingUnspecifiedDimensions().width
         let layoutResult = FlexibleLayoutResult(
             availableWidth: availableWidth,
