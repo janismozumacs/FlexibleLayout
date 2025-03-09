@@ -23,7 +23,7 @@ public struct FlexibleLayout<Data: RandomAccessCollection,
     private let configuration: FlexibleLayoutConfiguration
     private let content: (Data.Element) -> Content
    
-    init(data: Data,
+    public init(data: Data,
          configuration: FlexibleLayoutConfiguration,
          content: @escaping (Data.Element) -> Content) {
         self.data = data
