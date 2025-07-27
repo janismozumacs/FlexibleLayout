@@ -23,8 +23,6 @@ internal struct FlexibleLayoutResult {
         let subviewSizes: [CGSize]  // The sizes for each subview in the row.
         let isFullWidth: Bool       // Indicates if this row is a full-width row.
     }
-    
-    private let isIpad: Bool
 
     /// Initializes the layout result.
     /// - Parameters:
@@ -40,12 +38,12 @@ internal struct FlexibleLayoutResult {
          idealCountInRow: Int?,
          isIpad: Bool) {
         let result = Self.calculateLayout(availableWidth: availableWidth,
-                                           subviews: subviews,
-                                           configuration: configuration,
-                                           itemPreference: itemPreference,
-                                           idealCountInRow: idealCountInRow)
+                                          subviews: subviews,
+                                          configuration: configuration,
+                                          itemPreference: itemPreference,
+                                          idealCountInRow: idealCountInRow,
+                                          isIpad: isIpad)
         self.totalSize = result.totalSize
-        self.isIpad = isIpad
         self.rows = result.rows
     }
 
@@ -55,7 +53,8 @@ internal struct FlexibleLayoutResult {
                                         subviews: LayoutSubviews,
                                         configuration: FlexibleLayoutConfiguration,
                                         itemPreference: [FlexibleElementPreference],
-                                        idealCountInRow: Int?) -> (totalSize: CGSize, rows: [Row]) {
+                                        idealCountInRow: Int?,
+                                        isIpad: Bool) -> (totalSize: CGSize, rows: [Row]) {
         var rows: [Row] = []
         // Trackers for normal (non-full-width) rows.
         var currentIndices: [Int] = []
@@ -259,7 +258,8 @@ internal struct FlexibleLayoutImplementation: Layout {
             subviews: subviews,
             configuration: configuration,
             itemPreference: itemPreference,
-            idealCountInRow: idealCountInRow
+            idealCountInRow: idealCountInRow,
+            isIpad: isIpad
         )
         cache.layoutResult = layoutResult
     }
