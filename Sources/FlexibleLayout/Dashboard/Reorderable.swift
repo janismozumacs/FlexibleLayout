@@ -9,7 +9,7 @@ import Foundation
 
 public protocol Reorderable {
     
-    associatedtype OrderElement: Equatable
+    public associatedtype OrderElement: Equatable
     
     var orderElement: OrderElement { get }
 }

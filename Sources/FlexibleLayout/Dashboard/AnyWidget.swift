@@ -11,23 +11,23 @@ import SwiftUI
 public struct AnyWidget: FlexibleElementDisplay {
     
     // unique string for view model logic
-    var widgetId: String { widget.widgetId }
+    public var widgetId: String { widget.widgetId }
     
     // unique string, when this changes, widget is bound to reload
     public var id: String { widget.id }
     
     // convenience for making widget view
-    var makeView: AnyView { widget.makeView }
+    public var makeView: AnyView { widget.makeView }
     
     // widget display model
-    var widget: DashboardWidgetDisplay
+    public var widget: DashboardWidgetDisplay
     
     // widget sizing type
     public var sizing: FlexibleElementSizing
     
-    var ignoreSidePaddingForRow: Bool { widget.ignoreSidePaddingForRow }
+    public var ignoreSidePaddingForRow: Bool { widget.ignoreSidePaddingForRow }
     
-    init?<Widget: DashboardWidgetDisplay>(_ widget: Widget?) {
+    public init?<Widget: DashboardWidgetDisplay>(_ widget: Widget?) {
         guard let widget = widget else { return nil }
         self.widget = widget
         self.sizing = .widget(type: widget.size)
@@ -75,7 +75,7 @@ public struct AnyWidget: FlexibleElementDisplay {
 
 extension AnyWidget: Reorderable {
     
-    typealias OrderElement = String
+    public typealias OrderElement = String
     
     var orderElement: OrderElement { widgetId }
 }
