@@ -27,7 +27,7 @@ public struct FlexibleLayout<Data: RandomAccessCollection,
     public init(data: Data,
                 configuration: FlexibleLayoutConfiguration,
                 isIpad: Bool = false,
-         content: @escaping (Data.Element) -> Content) {
+                content: @escaping (Data.Element) -> Content) {
         self.data = data
         self.configuration = configuration
         self.isIpad = isIpad
