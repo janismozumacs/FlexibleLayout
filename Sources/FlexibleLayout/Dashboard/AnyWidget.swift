@@ -77,5 +77,5 @@ extension AnyWidget: Reorderable {
     
     public typealias OrderElement = String
     
-    var orderElement: OrderElement { widgetId }
+    public var orderElement: OrderElement { widgetId }
 }
