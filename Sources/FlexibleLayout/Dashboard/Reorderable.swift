@@ -11,7 +11,7 @@ public protocol Reorderable {
     
     public associatedtype OrderElement: Equatable
     
-    var orderElement: OrderElement { get }
+    public var orderElement: OrderElement { get }
 }
 
 extension Array where Element: Reorderable {
