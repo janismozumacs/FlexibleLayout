@@ -9,9 +9,9 @@ import Foundation
 
 public protocol Reorderable {
     
-    public associatedtype OrderElement: Equatable
+    associatedtype OrderElement: Equatable
     
-    public var orderElement: OrderElement { get }
+    var orderElement: OrderElement { get }
 }
 
 extension Array where Element: Reorderable {
