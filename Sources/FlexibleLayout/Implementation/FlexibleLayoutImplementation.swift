@@ -23,6 +23,8 @@ internal struct FlexibleLayoutResult {
         let subviewSizes: [CGSize]  // The sizes for each subview in the row.
         let isFullWidth: Bool       // Indicates if this row is a full-width row.
     }
+    
+    private let isIpad: Bool
 
     /// Initializes the layout result.
     /// - Parameters:
@@ -35,13 +37,15 @@ internal struct FlexibleLayoutResult {
          subviews: LayoutSubviews,
          configuration: FlexibleLayoutConfiguration,
          itemPreference: [FlexibleElementPreference],
-         idealCountInRow: Int?) {
+         idealCountInRow: Int?,
+         isIpad: Bool) {
         let result = Self.calculateLayout(availableWidth: availableWidth,
                                            subviews: subviews,
                                            configuration: configuration,
                                            itemPreference: itemPreference,
                                            idealCountInRow: idealCountInRow)
         self.totalSize = result.totalSize
+        self.isIpad = isIpad
         self.rows = result.rows
     }
 
@@ -91,7 +95,6 @@ internal struct FlexibleLayoutResult {
         // Helper function to compute the desired widget width for a given widget sizing.
         // This function accounts for side paddings and inter-item spacing.
         func desiredWidth(for widgetSizing: WidgetSizing) -> CGFloat {
-            let isIpad = getIsIpad()
             switch widgetSizing {
             case .small:
                 // iPad: 4 per row; iPhone: 2 per row.
@@ -202,6 +205,7 @@ internal struct FlexibleLayoutImplementation: Layout {
 
     let itemPreference: [FlexibleElementPreference]
     let configuration: FlexibleLayoutConfiguration
+    let isIpad: Bool
     
     // Row alignments are now provided from configuration.
     var idealCountInRow: Int?
@@ -280,11 +284,5 @@ private extension VerticalAlignment {
         case .bottom: return 1
         default: return 0.5
         }
-    }
-}
-
-private func getIsIpad() -> Bool {
-    return DispatchQueue.main.sync {
-        UIDevice.current.userInterfaceIdiom == .pad
     }
 }

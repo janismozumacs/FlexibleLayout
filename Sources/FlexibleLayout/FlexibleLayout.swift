@@ -24,7 +24,8 @@ public struct FlexibleLayout<Data: RandomAccessCollection,
     private let content: (Data.Element) -> Content
    
     public init(data: Data,
-         configuration: FlexibleLayoutConfiguration,
+                configuration: FlexibleLayoutConfiguration,
+                isIpad: Bool = false,
          content: @escaping (Data.Element) -> Content) {
         self.data = data
         self.configuration = configuration
@@ -34,7 +35,8 @@ public struct FlexibleLayout<Data: RandomAccessCollection,
     public var body: some View {
         FlexibleLayoutImplementation(
             itemPreference: data.map({ .init(item: $0) }),
-            configuration: configuration
+            configuration: configuration,
+            isIpad: isIpad
         ) {
             ForEach(data, id: \.id) { item in
                 if item.sizing == .dynamicWidth {
