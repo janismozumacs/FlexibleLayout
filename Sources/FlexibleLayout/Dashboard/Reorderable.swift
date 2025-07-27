@@ -14,7 +14,7 @@ public protocol Reorderable {
     var orderElement: OrderElement { get }
 }
 
-public extension Array where Element: Reorderable {
+extension Array where Element: Reorderable {
 
     func reorder(by preferredOrder: [Element.OrderElement]) -> [Element] {
         sorted {

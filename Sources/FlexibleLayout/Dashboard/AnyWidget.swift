@@ -14,7 +14,7 @@ public struct AnyWidget: FlexibleElementDisplay {
     var widgetId: String { widget.widgetId }
     
     // unique string, when this changes, widget is bound to reload
-    var id: String { widget.id }
+    public var id: String { widget.id }
     
     // convenience for making widget view
     var makeView: AnyView { widget.makeView }
@@ -23,7 +23,7 @@ public struct AnyWidget: FlexibleElementDisplay {
     var widget: DashboardWidgetDisplay
     
     // widget sizing type
-    var sizing: FlexibleElementSizing
+    public var sizing: FlexibleElementSizing
     
     var ignoreSidePaddingForRow: Bool { widget.ignoreSidePaddingForRow }
     
@@ -37,14 +37,15 @@ public struct AnyWidget: FlexibleElementDisplay {
         }
     }
     
-    static func == (lhs: AnyWidget, rhs: AnyWidget) -> Bool {
+    static public func == (lhs: AnyWidget, rhs: AnyWidget) -> Bool {
         return lhs.id == rhs.id
     }
     
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
     
+    @MainActor
     func calculateWidth(for availableWidth: CGFloat) -> CGFloat? {
         if UIDevice.current.userInterfaceIdiom == .pad {
             switch widget.size {
@@ -72,7 +73,7 @@ public struct AnyWidget: FlexibleElementDisplay {
     }
 }
 
-public extension AnyWidget: Reorderable {
+extension AnyWidget: Reorderable {
     
     typealias OrderElement = String
     
