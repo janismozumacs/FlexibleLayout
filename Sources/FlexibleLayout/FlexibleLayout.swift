@@ -22,6 +22,7 @@ public struct FlexibleLayout<Data: RandomAccessCollection,
     private let data: Data
     private let configuration: FlexibleLayoutConfiguration
     private let content: (Data.Element) -> Content
+    private let isIpad: Bool
    
     public init(data: Data,
                 configuration: FlexibleLayoutConfiguration,
@@ -29,6 +30,7 @@ public struct FlexibleLayout<Data: RandomAccessCollection,
          content: @escaping (Data.Element) -> Content) {
         self.data = data
         self.configuration = configuration
+        self.isIpad = isIpad
         self.content = content
     }
     
