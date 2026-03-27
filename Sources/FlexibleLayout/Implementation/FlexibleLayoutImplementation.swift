@@ -171,15 +171,17 @@ internal struct FlexibleLayoutResult {
                 finalizeRow()
             }
 
-            // Determine the x-offset for the element.
-            // For the first element in a normal row, the offset is the left side padding.
-            let offset: CGFloat = currentIndices.isEmpty ? configuration.sidePadding : (currentRowWidth + spacingBefore())
+            // Capture spacing before appending to currentIndices, since spacingBefore()
+            // checks isEmpty to decide between sidePadding and spacingHorizontal.
+            let isFirstInRow = currentIndices.isEmpty
+            let spacing = isFirstInRow ? configuration.sidePadding : configuration.spacingHorizontal
+            let offset: CGFloat = isFirstInRow ? configuration.sidePadding : (currentRowWidth + spacing)
             currentOffsets.append(offset)
             currentSizes.append(elementSize)
             currentIndices.append(index)
 
             // Update the cumulative row width with the element's width and the spacing used.
-            currentRowWidth += elementSize.width + spacingBefore()
+            currentRowWidth += elementSize.width + spacing
             // Update the row height to be the maximum height in the row.
             currentRowHeight = max(currentRowHeight, elementSize.height)
         }
