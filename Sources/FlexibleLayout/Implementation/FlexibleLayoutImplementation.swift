@@ -127,9 +127,14 @@ internal struct FlexibleLayoutResult {
 
             switch sizingCase {
             case .dynamicWidth:
-                // For dynamic width, remove both left and right side paddings.
-                let contentWidth = availableWidth - 2 * configuration.sidePadding
-                elementSize = subviews[index].sizeThatFits(ProposedViewSize(width: contentWidth, height: nil))
+                if idealCountInRow != nil {
+                    // When idealCountInRow is set, size to intrinsic content.
+                    elementSize = subviews[index].sizeThatFits(.unspecified)
+                } else {
+                    // Otherwise, propose available width minus side paddings.
+                    let contentWidth = availableWidth - 2 * configuration.sidePadding
+                    elementSize = subviews[index].sizeThatFits(ProposedViewSize(width: contentWidth, height: nil))
+                }
             case .widget(let widgetSizing):
                 // Handle full-width widget that ignores side paddings separately.
                 if widgetSizing == .largeIgnoresSidePaddings {
@@ -159,7 +164,7 @@ internal struct FlexibleLayoutResult {
             let extraWidth = elementSize.width + spacingBefore()
 
             // If adding this element would exceed available width (including right side padding),
-            // finalize the current row.
+            // or the row has reached the ideal count, finalize the current row.
             if !currentIndices.isEmpty,
                (currentRowWidth + extraWidth + configuration.sidePadding > availableWidth ||
                 (idealCountInRow != nil && currentIndices.count >= idealCountInRow!)) {
