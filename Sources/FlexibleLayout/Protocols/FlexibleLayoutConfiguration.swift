@@ -29,18 +29,20 @@ public protocol FlexibleLayoutConfiguration {
 // This struct provides a default configuration for the flexible layout,
 // conforming to the FlexibleLayoutConfiguration protocol.
 public struct FlexibleLayoutDefaultConfiguration: FlexibleLayoutConfiguration {
+    public init() {}
+
     // Set a default side padding of 16 points.
     public var sidePadding: CGFloat { 16.0 }
-    
+
     // Set a default horizontal spacing of 16 points between items.
     public var spacingHorizontal: CGFloat { 16.0 }
-    
+
     // Set a default vertical spacing of 16 points between items.
     public var spacingVertical: CGFloat { 16.0 }
-    
+
     // Default horizontal alignment for rows is centered.
-    public var rowHorizontalAlignment: HorizontalAlignment { .leading }
-    
+    public var rowHorizontalAlignment: HorizontalAlignment { .center }
+
     // Default vertical alignment for rows is centered.
     public var rowVerticalAlignment: VerticalAlignment { .center }
 }

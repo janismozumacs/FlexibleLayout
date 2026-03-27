@@ -15,30 +15,25 @@ struct FlexibleElementPreference {
     }
 }
 
-@available(iOS 16, *)
 public struct FlexibleLayout<Data: RandomAccessCollection,
                              Content: View>: View where Data.Element: FlexibleElementDisplay {
-    
+
     private let data: Data
     private let configuration: FlexibleLayoutConfiguration
     private let content: (Data.Element) -> Content
-    private let isIpad: Bool
-   
+
     public init(data: Data,
                 configuration: FlexibleLayoutConfiguration,
-                isIpad: Bool = false,
                 content: @escaping (Data.Element) -> Content) {
         self.data = data
         self.configuration = configuration
-        self.isIpad = isIpad
         self.content = content
     }
     
     public var body: some View {
         FlexibleLayoutImplementation(
             itemPreference: data.map({ .init(item: $0) }),
-            configuration: configuration,
-            isIpad: isIpad
+            configuration: configuration
         ) {
             ForEach(data, id: \.id) { item in
                 if item.sizing == .dynamicWidth {

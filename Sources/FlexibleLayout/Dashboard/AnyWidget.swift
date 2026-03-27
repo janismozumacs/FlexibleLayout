@@ -9,24 +9,24 @@ import SwiftUI
 // MARK: - type eraser for dashboard widget
 // this helps to wrap concrete widget view models for display
 public struct AnyWidget: FlexibleElementDisplay {
-    
+
     // unique string for view model logic
     public var widgetId: String { widget.widgetId }
-    
+
     // unique string, when this changes, widget is bound to reload
     public var id: String { widget.id }
-    
+
     // convenience for making widget view
     public var makeView: AnyView { widget.makeView }
-    
+
     // widget display model
     public var widget: DashboardWidgetDisplay
-    
+
     // widget sizing type
     public var sizing: FlexibleElementSizing
-    
+
     public var ignoreSidePaddingForRow: Bool { widget.ignoreSidePaddingForRow }
-    
+
     public init?<Widget: DashboardWidgetDisplay>(_ widget: Widget?) {
         guard let widget = widget else { return nil }
         self.widget = widget
@@ -45,7 +45,6 @@ public struct AnyWidget: FlexibleElementDisplay {
         hasher.combine(id)
     }
     
-    @MainActor
     func calculateWidth(for availableWidth: CGFloat) -> CGFloat? {
         if UIDevice.current.userInterfaceIdiom == .pad {
             switch widget.size {
@@ -76,6 +75,6 @@ public struct AnyWidget: FlexibleElementDisplay {
 extension AnyWidget: Reorderable {
     
     public typealias OrderElement = String
-    
+
     public var orderElement: OrderElement { widgetId }
 }

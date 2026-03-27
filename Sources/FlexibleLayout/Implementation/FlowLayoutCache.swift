@@ -7,8 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 16, *)
-internal struct FlexibleLayoutCache {
+struct FlexibleLayoutCache {
     var layoutResult: FlexibleLayoutResult?
     
     var shouldReset: Bool = false
