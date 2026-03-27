@@ -213,6 +213,9 @@ internal struct FlexibleLayoutImplementation: Layout {
                        proposal: ProposedViewSize,
                        subviews: Subviews,
                        cache: inout Cache) {
+        cache.validate(forProposedContainer: proposal) {
+            prepareLayout(subviews, inContainer: proposal, cache: &$0)
+        }
         guard let layoutResult = cache.layoutResult else { return }
 
         // Place each row based on the row alignments provided in configuration.

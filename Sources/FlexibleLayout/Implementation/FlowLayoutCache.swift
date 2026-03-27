@@ -17,7 +17,7 @@ struct FlexibleLayoutCache {
                            afterReset performUpdate: (inout Self) -> Void) {
         
         // If cache should reset, or container changed size
-        if shouldReset || proposedContainerSize?.width != proposal.width {
+        if shouldReset || proposedContainerSize?.width != proposal.width || proposedContainerSize?.height != proposal.height {
             // reset cached layout
             layoutResult = nil
             
