@@ -142,6 +142,7 @@ internal struct FlexibleLayoutResult {
                     if !currentIndices.isEmpty { finalizeRow() }
                     // Compute size using full available width.
                     elementSize = subviews[index].sizeThatFits(ProposedViewSize(width: availableWidth, height: nil))
+                    elementSize = elementSize.roundedUp
                     // Create a row exclusively for this full-width widget.
                     let rowFrame = CGRect(x: 0, y: totalHeight, width: availableWidth, height: elementSize.height)
                     // Full-width rows have no side paddings, so x-offset is 0.
@@ -159,6 +160,11 @@ internal struct FlexibleLayoutResult {
                     elementSize = subviews[index].sizeThatFits(ProposedViewSize(width: desiredW, height: nil))
                 }
             }
+
+            // Round the measured size up to whole points. placeSubviews re-proposes
+            // each subview exactly its measured size; handing back a fractional
+            // width can round short at render time and truncate text mid-word.
+            elementSize = elementSize.roundedUp
 
             // Calculate extra width required for this element, including the spacing before it.
             let extraWidth = elementSize.width + spacingBefore()
@@ -293,4 +299,15 @@ private extension VerticalAlignment {
 
 private func getIsIpad() -> Bool {
     UIDevice.current.userInterfaceIdiom == .pad
+}
+
+// MARK: - Size Rounding
+
+private extension CGSize {
+    /// The size with both dimensions rounded up to whole points, so a
+    /// measured size can be proposed back to the subview without the
+    /// fractional part rounding short of what the content needs.
+    var roundedUp: CGSize {
+        CGSize(width: ceil(width), height: ceil(height))
+    }
 }
